@@ -70,6 +70,20 @@ class GameView extends SurfaceView implements Runnable {
     private int currentFrameTnt = 2;
     private int frameCountTnt = 2;
 
+    private Bitmap bitmapHeart;
+
+    public static int frameWidthHeart = 60, frameHeightHeart = 60;
+
+
+
+    private int frameCountHeart = 3;
+
+    private int counterTNT = 0;
+
+    private final static int MaxLifes = 3;
+    private int counterHeart;
+
+
 
 
     public GameView(Context context){
@@ -89,8 +103,12 @@ class GameView extends SurfaceView implements Runnable {
         bitmapShuriken = Bitmap.createScaledBitmap(bitmapShuriken, frameWidthShuriken * frameCountShuriken, frameHeightShuriken, false);
 
         bitmapTnt = BitmapFactory.decodeResource(getResources(), R.drawable.tnt);
-        bitmapTnt = Bitmap.createScaledBitmap(bitmapTnt, frameWidthTnt * currentFrameTnt, frameHeightTnt, false );
+        bitmapTnt = Bitmap.createScaledBitmap(bitmapTnt, frameWidthTnt * frameCountTnt, frameHeightTnt, false );
 
+        bitmapHeart = BitmapFactory.decodeResource(getResources(), R.drawable.heart);
+        bitmapHeart = Bitmap.createScaledBitmap(bitmapHeart, frameWidthHeart * frameCountHeart, frameHeightHeart, false);
+
+        counterHeart = MaxLifes;
 
     }
     @Override
@@ -137,6 +155,7 @@ class GameView extends SurfaceView implements Runnable {
             ninja.update();
         }
 
+
         for (Tnt tnt : tntArry)
             tnt.update();
 
@@ -151,7 +170,11 @@ class GameView extends SurfaceView implements Runnable {
 
         if (tntHitNinja())
         {
-            tntArry.get(0).setTntAlive(false);
+            counterHeart--;
+            if (counterHeart == 0) {
+                tntArry.get(0).setTntAlive(false);
+                playing = false;
+            }
         }
     }
 
@@ -161,30 +184,38 @@ class GameView extends SurfaceView implements Runnable {
     public void manageCurrentFrame() {
         long time = System.currentTimeMillis();
 
-        if (isMovingNinja) {
             if (time > lastFrameChangeTime + frameLengthInMillisecond) {
-                lastFrameChangeTime = time;
-                currentFrameNinja++;
+                // NINJA ONLY WHEN MOVING UPDATE SPRITE
+                if (isMovingNinja) {
+
+                    lastFrameChangeTime = time;
+                    currentFrameNinja++;
+
+
+                    if (currentFrameNinja >= frameCountNinja) {
+                        currentFrameNinja = 0;
+                    }
+                    frameToDrawNinja.left = currentFrameNinja * frameWidthNinja;
+                    frameToDrawNinja.right = frameToDrawNinja.left + frameWidthNinja;
+                }
+
+                // TNT
                 currentFrameTnt++;
 
                 if (currentFrameTnt >= frameCountTnt)
                     currentFrameTnt = 0;
-
-                if (currentFrameNinja >= frameCountNinja) {
-                    currentFrameNinja = 0;
-                }
+                frameToDrawTnt.left = currentFrameTnt * frameWidthTnt;
+                frameToDrawTnt.right = frameToDrawTnt.left + frameWidthTnt;
                 /*
                 if (currentFrameNinja >= frameCountNinjaStill) {
                     currentFrameNinja = 0;
                 }*/
             }
-            frameToDrawNinja.left = currentFrameNinja * frameWidthNinja;
-            frameToDrawNinja.right = frameToDrawNinja.left + frameWidthNinja;
 
-            frameToDrawTnt.left = currentFrameTnt * frameWidthTnt;
-            frameToDrawTnt.right = frameToDrawTnt.left + frameWidthTnt;
+
         }
-    }
+
+
 
     public void draw() {
         if (ourHolder.getSurface().isValid()) {
@@ -232,6 +263,12 @@ class GameView extends SurfaceView implements Runnable {
                 whereToDrawTnt.set(tnt.getX(),tnt.getY(), tnt.getX() + frameWidthTnt, tnt.getY() + frameHeightTnt);
                 canvas.drawBitmap(tnt.getBitmap(), frameToDrawTnt, whereToDrawTnt, null);
             }
+            manageCurrentFrame();
+
+             for (int i = 0; i < counterHeart; i++)
+             {
+                 canvas.drawBitmap(bitmapHeart, 15 + i*frameWidthHeart, 15, null);
+             }
 
             ourHolder.unlockCanvasAndPost(canvas);
 /*
@@ -310,12 +347,15 @@ class GameView extends SurfaceView implements Runnable {
 
 
             if (ninja.getX() >= tnt.getX() && ninja.getX() <= tnt.getX() + tnt.getWidth() && ninja.getY() >= ninja.getY() && ninja.getY() <= tnt.getY() + tnt.getHeight())
+            {
+                tnt.resetAfterCollision();
                 return true;
-
+            }
             if (ninja.getX() + ninja.getWidth() >= tnt.getX() && ninja.getX() + ninja.getWidth() <= tnt.getX() + tnt.getWidth() && ninja.getY() + ninja.getHeight() >= ninja.getY() && ninja.getY() + ninja.getHeight() <= tnt.getY() + tnt.getHeight())
+            {
+                tnt.resetAfterCollision();
                 return true;
-
-
+            }
         }
         return false;
     }

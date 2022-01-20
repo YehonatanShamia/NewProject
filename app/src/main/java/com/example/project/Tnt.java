@@ -45,6 +45,11 @@ public class Tnt extends Element {
         this.speed = speed;
     }
 
+    public void resetAfterCollision(){
+        this.setY(0);
+        randomizeX();
+    }
+
 
     public void startTntThread()
     {
