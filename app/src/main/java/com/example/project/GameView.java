@@ -3,13 +3,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.ThemedSpinnerAdapter;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -72,7 +77,7 @@ class GameView extends SurfaceView implements Runnable {
 
     private Bitmap bitmapHeart;
 
-    public static int frameWidthHeart = 60, frameHeightHeart = 60;
+    public static int frameWidthHeart = 30, frameHeightHeart = 60;
 
 
 
@@ -128,7 +133,7 @@ class GameView extends SurfaceView implements Runnable {
         }
     }
 
-    private void runTimerThread() {
+    public void runTimerThread() {
         // timer thread
         new Thread(new Runnable() {
             @Override
@@ -148,6 +153,7 @@ class GameView extends SurfaceView implements Runnable {
             }
         }).start();
     }
+
 
     public void update() {
 
@@ -217,6 +223,8 @@ class GameView extends SurfaceView implements Runnable {
 
 
 
+
+
     public void draw() {
         if (ourHolder.getSurface().isValid()) {
             canvas = ourHolder.lockCanvas();
@@ -267,8 +275,24 @@ class GameView extends SurfaceView implements Runnable {
 
              for (int i = 0; i < counterHeart; i++)
              {
-                 canvas.drawBitmap(bitmapHeart, 15 + i*frameWidthHeart, 15, null);
+                 canvas.drawBitmap(bitmapHeart, 10 + i*frameWidthHeart*3, 10, null);
              }
+            Paint paint = new Paint();
+            paint.setColor(Color.BLACK);
+            paint.setTextSize(80);
+            int countTime = 0;
+            if (timer > 59) {
+
+                canvas.drawText(String.valueOf(((timer - 60*countTime) /10)) , 15 , 150, paint);
+                canvas.drawText(":", 110 , 150, paint);
+                canvas.drawText(String.valueOf(timer%60),133, 150, paint);
+
+            }
+            else {
+             canvas.drawText(("00:" + (String.valueOf((timer)))), 15 , 150, paint);
+            // canvas.drawText(String.valueOf(timer),125, 150, paint);
+            }
+
 
             ourHolder.unlockCanvasAndPost(canvas);
 /*
@@ -359,6 +383,8 @@ class GameView extends SurfaceView implements Runnable {
         }
         return false;
     }
+
+
 
 }
 
